@@ -1,0 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+
+@layer base {
+  body {
+    @apply bg-backgroundLight font-Montserrat;
+  }
+}
+
+@layer components {
+  .footer-content {
+    @apply text-[16px];
+  }
+
+  .status-flag {
+    @apply w-full bg-backgroundDark min-h-[60px] shadow-sm rounded-md border-t-[10px] p-8 text-white font-bold;
+  }
+}
