@@ -1,6 +1,7 @@
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
 import { ChevronDownIcon } from "@heroicons/react/solid";
 import { useState } from "react";
+
 let FoodItems = [
   {
     name: "Apple",
