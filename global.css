@@ -11,7 +11,7 @@
 
 @layer components {
   .footer-content {
-    @apply text-[16px];
+    @apply text-[10px] md:text-[16px];
   }
 
   .status-flag {
