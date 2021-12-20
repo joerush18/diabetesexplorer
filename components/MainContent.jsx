@@ -88,7 +88,7 @@ const MainContent = () => {
           </div>
           {/* dropsdown */}
           {dropDown && (
-            <div className="h-[300px] w-full bg-white mt-2 shadow-md overflow-scroll overflow-x-hidden">
+            <div className="h-[250px] w-full bg-white mt-2 mb-8 shadow-md overflow-scroll overflow-x-hidden">
               {FoodItems.map((food, index) => {
                 const { name, description, status } = food;
                 return (
