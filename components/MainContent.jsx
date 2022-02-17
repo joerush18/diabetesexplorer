@@ -1,55 +1,67 @@
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
-import { ChevronDownIcon } from "@heroicons/react/solid";
+import { ChevronDownIcon, SearchIcon } from "@heroicons/react/solid";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getNutrientsData,
+  fetchNutrients,
+  removeNutrients,
+} from "../redux/slices/nutrientSlice";
+
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 let FoodItems = [
   {
     name: "Apple",
-    description: "This is a tasty food.",
     status: "yes",
   },
   {
     name: "Mango",
-    description: "This is Awesome food.",
     status: "yes",
   },
   {
     name: "Orange",
-    description: "This is a sexy food.",
     status: "Yes",
   },
   {
-    name: "But",
-    description: "This is a cool food.",
+    name: "Nut",
     status: "yes",
   },
-  {
-    name: "Nut",
-    description: "This is a hero food.",
-    status: "no",
-  },
-  {
-    name: "Shut",
-    description: "This is a hell food.",
-    status: "no",
-  },
-  {
-    name: "Rot",
-    description: "This is a shit food.",
-    status: "no",
-  },
-  {
-    name: "Shit",
-    description: "This is a shit food.",
-    status: "no",
-  },
 ];
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
 const MainContent = () => {
   const [foodname, setFoodname] = useState("");
   const [dropDown, setDropdown] = useState(false);
-  const [description, setDescription] = useState("");
+  const [inputField, setInputField] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [eatableStatus, seteatableStatus] = useState("");
+  const dispatch = useDispatch();
+  const nutrients = useSelector(getNutrientsData);
+  const onFoodSelectHandler = async (food) => {
+    setLoading(true);
+    await dispatch(removeNutrients());
+    setDropdown(false);
+    setInputField(false);
+    setFoodname(food.name);
+    seteatableStatus(food.status);
+    await dispatch(fetchNutrients(food.name));
+    setLoading(false);
+  };
+
+  const onSearchHandler = async () => {
+    setLoading(true);
+    await dispatch(removeNutrients());
+    setInputField(false);
+    await dispatch(fetchNutrients(foodname));
+    setLoading(false);
+  };
+
+  const calculateEatablity = () => {};
 
   return (
     <>
@@ -70,37 +82,58 @@ const MainContent = () => {
           </h3>
           {/* selection box */}
           <div
-            className=" bg-white h-12 w-full mr-10 px-6 rounded-md shadow-md flex items-center justify-between"
+            className=" bg-white h-12 w-full mr-10 px-4 pr-6 rounded-md shadow-md flex items-center justify-between"
             onClick={() => {
-              setDropdown(!dropDown);
-              setDescription();
+              setInputField(true);
             }}
           >
-            {foodname ? (
-              <h1 className="font-bold opacity-50 cursor-pointer">
-                {foodname}
-              </h1>
-            ) : (
+            {foodname && !inputField ? (
+              <div
+                onClick={() => {
+                  setInputField(true);
+                }}
+              >
+                <h1 className="font-bold opacity-50 cursor-pointer">
+                  {foodname}
+                </h1>
+              </div>
+            ) : !inputField ? (
               <DotsHorizontalIcon className="h-4 w-4 bg-white opacity-50" />
+            ) : (
+              <input
+                type="text"
+                placeholder="Enter food name"
+                className="w-full text-black font-bold opacity-50 border-none pr-3 py-2 focus:outline-none"
+                onChange={(e) => {
+                  setFoodname(e.target.value);
+                }}
+              />
             )}
-
-            <ChevronDownIcon className="h-6 w-6  opacity-50 bg-white cursor-pointer hover:opacity-90" />
+            {inputField ? (
+              <SearchIcon
+                className="h-6 w-6  opacity-50 bg-white cursor-pointer hover:opacity-90 "
+                onClick={() => {
+                  onSearchHandler();
+                }}
+              />
+            ) : (
+              <ChevronDownIcon
+                className="h-6 w-6  opacity-50 bg-white cursor-pointer hover:opacity-90 "
+                onClick={() => {
+                  setDropdown(!dropDown);
+                }}
+              />
+            )}
           </div>
           {/* dropsdown */}
           {dropDown && (
             <div className="h-[250px] w-full bg-white mt-2 mb-8 shadow-md overflow-scroll overflow-x-hidden">
               {FoodItems.map((food, index) => {
-                const { name, description, status } = food;
                 return (
                   <div
-                    className="px-6 py-4 cursor-pointer flex item-center hover:bg-primaryColor hover:text-text-primary font-bold opacity-50 hover:text-white hover:opacity-100"
+                    className="px-6 py-4 cursor-pointer flex justify-between hover:bg-primaryColor hover:text-text-primary font-bold opacity-50 hover:text-white hover:opacity-100"
                     key={index}
-                    onClick={() => {
-                      setDropdown(false);
-                      setFoodname(name);
-                      setDescription(description);
-                      seteatableStatus(status);
-                    }}
+                    onClick={() => onFoodSelectHandler(food)}
                   >
                     <h1>{food.name}</h1>
                   </div>
@@ -113,12 +146,17 @@ const MainContent = () => {
         {/* Right part */}
         <div
           className={
-            !description && dropDown
+            !nutrients && dropDown
               ? "hidden lg:inline lg:mt-8 lg:w-full lg:mb-10"
               : "mt-8 w-full mb-10"
           }
         >
-          <h1 className="text-2xl font-bold  mb-5 ">Description</h1>
+          <div className="flex">
+            <h1 className="text-2xl font-bold  mb-5 ">Description :</h1>
+            <h1 className="text-2xl font-bold text-primaryColor mb-5 ">
+              {`- ${foodname.toUpperCase()}`}
+            </h1>
+          </div>
           <div
             className={
               eatableStatus === "no"
@@ -126,7 +164,42 @@ const MainContent = () => {
                 : "status-flag border-statusYes"
             }
           >
-            {description}
+            {nutrients !== null && (
+              <h1 className=" text-xl text mb-2 ">Nutrition values</h1>
+            )}
+            {/* {nutrients.map((item) => (
+              <h1 className=" text-2xl ">{item.name.toUpperCase()}</h1>
+            ))} */}
+
+            <div className="flex flex-wrap">
+              {!loading ? (
+                nutrients.map((item) =>
+                  Object.keys(item)
+                    .filter((ite) => ite != "name")
+                    .map((it) => (
+                      <div className=" bg-gray-100 py-[5px] px-[10px] rounded-md m-[5px] flex">
+                        <h1 className="text-black opacity-50">
+                          {it[0].toUpperCase() + it.slice(1).split("_")[0]} :
+                        </h1>
+                        <h1 className="text-primaryColor ml-1">{item[it]}</h1>
+                        <h1></h1>
+                      </div>
+                    ))
+                )
+              ) : (
+                <Skeleton
+                  variant="rectangular"
+                  width={getRandomArbitrary(60, 100)}
+                  height={36}
+                  animation="pulse"
+                  count={8}
+                  inline="false"
+                  borderRadius={10}
+                  className="mr-4 mb-2"
+                  baseColor="#20252D"
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
