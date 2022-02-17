@@ -154,17 +154,17 @@ const MainContent = () => {
           <div className="flex">
             <h1 className="text-2xl font-bold  mb-5 ">Description :</h1>
             <h1 className="text-2xl font-bold text-primaryColor mb-5 ">
-              {`- ${foodname.toUpperCase()}`}
+              {`- ${foodname}`}
             </h1>
           </div>
           <div
             className={
-              eatableStatus === "no"
+              nutrients.length < 1
                 ? "border-statusNo  status-flag"
-                : "status-flag border-statusYes"
+                : "border-statusYes status-flag "
             }
           >
-            {nutrients !== null && (
+            {nutrients.length > 0 && (
               <h1 className=" text-xl text mb-2 ">Nutrition values</h1>
             )}
             {/* {nutrients.map((item) => (
@@ -172,7 +172,7 @@ const MainContent = () => {
             ))} */}
 
             <div className="flex flex-wrap">
-              {!loading ? (
+              {!loading && nutrients.length > 0 ? (
                 nutrients.map((item) =>
                   Object.keys(item)
                     .filter((ite) => ite != "name")
@@ -181,12 +181,14 @@ const MainContent = () => {
                         <h1 className="text-black opacity-50">
                           {it[0].toUpperCase() + it.slice(1).split("_")[0]} :
                         </h1>
-                        <h1 className="text-primaryColor ml-1">{item[it]}</h1>
+                        <h1 className="text-primaryColor ml-1">
+                          {item[it]} gm
+                        </h1>
                         <h1></h1>
                       </div>
                     ))
                 )
-              ) : (
+              ) : loading ? (
                 <Skeleton
                   variant="rectangular"
                   width={getRandomArbitrary(60, 100)}
@@ -198,8 +200,24 @@ const MainContent = () => {
                   className="mr-4 mb-2"
                   baseColor="#20252D"
                 />
+              ) : (
+                <h1 className="text-xl">
+                  Data not available for the given food.
+                </h1>
               )}
             </div>
+            {!loading && nutrients.length > 0 && (
+              <div className="mt-3 flex space-x-3 items-center">
+                <img
+                  src="https://cdn.iconscout.com/icon/free/png-256/check-verified-successful-accept-tick-yes-success-2516.png"
+                  height={50}
+                  width={50}
+                />
+                <h1 className="text-lg text-statusYes">
+                  Congrats!! Food is eatable. Take it in less amount though.
+                </h1>
+              </div>
+            )}
           </div>
         </div>
       </div>
