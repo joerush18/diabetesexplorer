@@ -9,3 +9,5 @@ export const api = axios.create({
 });
 
 // https://calorieninjas.p.rapidapi.com/v1/nutrition?query=Steak%20and%20Baked%20Potato
+
+//small changes environment variables added
