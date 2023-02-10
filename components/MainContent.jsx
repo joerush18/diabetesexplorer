@@ -202,7 +202,7 @@ const MainContent = () => {
                 />
               ) : (
                 <h1 className="text-xl">
-                  Data not available for the given food.
+                  Sorry, Data not available for the given food.
                 </h1>
               )}
             </div>
