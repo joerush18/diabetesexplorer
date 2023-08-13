@@ -5,30 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getNutrientsData,
   fetchNutrients,
-  removeNutrients,
 } from "../redux/slices/nutrientSlice";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
-let FoodItems = [
-  {
-    name: "Apple",
-    status: "yes",
-  },
-  {
-    name: "Mango",
-    status: "yes",
-  },
-  {
-    name: "Orange",
-    status: "Yes",
-  },
-  {
-    name: "Nut",
-    status: "yes",
-  },
-];
+import foods from "../data/nutrition.json";
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
@@ -39,29 +20,31 @@ const MainContent = () => {
   const [dropDown, setDropdown] = useState(false);
   const [inputField, setInputField] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [eatableStatus, seteatableStatus] = useState("");
+  const edible = useSelector(getNutrientsData);
   const dispatch = useDispatch();
-  const nutrients = useSelector(getNutrientsData);
+  const [selectedFood, setSelectedFood] = useState("");
+
+  let FoodItems = foods.slice(0, 1000);
+
   const onFoodSelectHandler = async (food) => {
     setLoading(true);
-    await dispatch(removeNutrients());
     setDropdown(false);
     setInputField(false);
     setFoodname(food.name);
-    seteatableStatus(food.status);
-    await dispatch(fetchNutrients(food.name));
+    setSelectedFood(food);
+    dispatch(fetchNutrients({ data: food }));
     setLoading(false);
   };
 
   const onSearchHandler = async () => {
-    setLoading(true);
-    await dispatch(removeNutrients());
-    setInputField(false);
-    await dispatch(fetchNutrients(foodname));
-    setLoading(false);
+    // setLoading(true);
+    // await dispatch(removeNutrients());
+    // setInputField(false);
+    // await dispatch(fetchNutrients(foodname));
+    // setLoading(false);
   };
 
-  const calculateEatablity = () => {};
+  console.log(edible);
 
   return (
     <>
@@ -93,7 +76,7 @@ const MainContent = () => {
                   setInputField(true);
                 }}
               >
-                <h1 className="font-bold opacity-50 cursor-pointer">
+                <h1 className="font-bold opacity-50 cursor-pointer capitalize">
                   {foodname}
                 </h1>
               </div>
@@ -106,36 +89,35 @@ const MainContent = () => {
                 className="w-full text-black font-bold opacity-50 border-none pr-3 py-2 focus:outline-none"
                 onChange={(e) => {
                   setFoodname(e.target.value);
+                  setDropdown(true);
                 }}
               />
             )}
-            {inputField ? (
-              <SearchIcon
-                className="h-6 w-6  opacity-50 bg-white cursor-pointer hover:opacity-90 "
-                onClick={() => {
-                  onSearchHandler();
-                }}
-              />
-            ) : (
-              <ChevronDownIcon
-                className="h-6 w-6  opacity-50 bg-white cursor-pointer hover:opacity-90 "
-                onClick={() => {
-                  setDropdown(!dropDown);
-                }}
-              />
-            )}
+            <ChevronDownIcon
+              className="h-6 w-6  opacity-50 bg-white cursor-pointer hover:opacity-90 "
+              onClick={() => {
+                setDropdown(!dropDown);
+              }}
+            />
           </div>
           {/* dropsdown */}
           {dropDown && (
-            <div className="h-[250px] w-full bg-white mt-2 mb-8 shadow-md overflow-scroll overflow-x-hidden">
+            <div className="max-h-[250px] w-full bg-white mt-2 mb-8 shadow-md overflow-scroll overflow-x-hidden">
               {FoodItems.map((food, index) => {
+                if (
+                  foodname &&
+                  foodname.trim() &&
+                  !food.name.toUpperCase().includes(foodname.toUpperCase())
+                ) {
+                  return null;
+                }
                 return (
                   <div
                     className="px-6 py-4 cursor-pointer flex justify-between hover:bg-primaryColor hover:text-text-primary font-bold opacity-50 hover:text-white hover:opacity-100"
                     key={index}
                     onClick={() => onFoodSelectHandler(food)}
                   >
-                    <h1>{food.name}</h1>
+                    <h1 className="capitalize">{food.name}</h1>
                   </div>
                 );
               })}
@@ -146,48 +128,46 @@ const MainContent = () => {
         {/* Right part */}
         <div
           className={
-            !nutrients && dropDown
+            !selectedFood && dropDown
               ? "hidden lg:inline lg:mt-8 lg:w-full lg:mb-10"
               : "mt-8 w-full mb-10"
           }
         >
           <div className="flex">
             <h1 className="text-2xl font-bold  mb-5 ">Description :</h1>
-            <h1 className="text-2xl font-bold text-primaryColor mb-5 ">
+            <h1 className="text-2xl font-bold text-primaryColor mb-5 capitalize ">
               {`- ${foodname}`}
             </h1>
           </div>
           <div
             className={
-              nutrients.length < 1
+              selectedFood < 1
                 ? "border-statusNo  status-flag"
                 : "border-statusYes status-flag "
             }
           >
-            {nutrients.length > 0 && (
+            {selectedFood && (
               <h1 className=" text-xl text mb-2 ">Nutrition values</h1>
             )}
-            {/* {nutrients.map((item) => (
-              <h1 className=" text-2xl ">{item.name.toUpperCase()}</h1>
-            ))} */}
 
             <div className="flex flex-wrap">
-              {!loading && nutrients.length > 0 ? (
-                nutrients.map((item) =>
-                  Object.keys(item)
-                    .filter((ite) => ite != "name")
-                    .map((it) => (
-                      <div className=" bg-gray-100 py-[5px] px-[10px] rounded-md m-[5px] flex">
-                        <h1 className="text-black opacity-50">
-                          {it[0].toUpperCase() + it.slice(1).split("_")[0]} :
-                        </h1>
-                        <h1 className="text-primaryColor ml-1">
-                          {item[it]} gm
-                        </h1>
-                        <h1></h1>
-                      </div>
-                    ))
-                )
+              {!loading && selectedFood ? (
+                Object.entries(selectedFood).map((it, index) => {
+                  if (it[0] === "name") {
+                    return;
+                  }
+                  return (
+                    <div
+                      className=" bg-gray-100 py-[5px] px-[10px] rounded-md m-[5px] flex"
+                      key={index}
+                    >
+                      <h1 className="text-black opacity-50">
+                        {it[0].toUpperCase()}
+                      </h1>
+                      <h1 className="text-primaryColor ml-1">{it[1]} gm</h1>
+                    </div>
+                  );
+                })
               ) : loading ? (
                 <Skeleton
                   variant="rectangular"
@@ -206,7 +186,7 @@ const MainContent = () => {
                 </h1>
               )}
             </div>
-            {!loading && nutrients.length > 0 && (
+            {!loading && selectedFood > 0 && (
               <div className="mt-3 flex space-x-3 items-center">
                 <img
                   src="https://cdn.iconscout.com/icon/free/png-256/check-verified-successful-accept-tick-yes-success-2516.png"

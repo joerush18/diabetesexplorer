@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "../../html/api";
+import { data } from "autoprefixer";
 
 const initialState = {
   nutrients: [],
@@ -7,10 +8,9 @@ const initialState = {
 
 export const fetchNutrients = createAsyncThunk(
   "nutrients/fetchNutrients",
-  async (item) => {
-    const response = await api.get(`?query=${item}`);
-    console.log(response.data.items);
-    return response.data.items;
+  async (food) => {
+    const response = await api.post("/predict", food);
+    return response.data.prediction;
   }
 );
 

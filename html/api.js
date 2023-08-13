@@ -1,10 +1,11 @@
 import axios from "axios";
 
+const URL = "http://localhost:8000/";
+
 export const api = axios.create({
-  baseURL: "https://calorieninjas.p.rapidapi.com/v1/nutrition",
+  baseURL: URL,
   headers: {
-    "x-rapidapi-key": "da4b0cce76msh013da5a6a55baeap12bbd9jsn293f76613d94",
-    "x-rapidapi-hos": "calorieninjas.p.rapidapi.com",
+    "Content-Type": "application/json",
   },
 });
 
